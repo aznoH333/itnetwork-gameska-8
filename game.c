@@ -1,5 +1,6 @@
 #include "gframework.c"
 #include "raylib.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -109,6 +110,26 @@ void updateTerrain(){
 
 
 bool canWalk(float x, float y){
+    int fixedX = ((int)roundf(x)) >> 4;
+    int fixedY = ((int)roundf(y)) >> 4;
+    
+
+
+    for (int i = 0; i < 2; i++){
+        for (int j = 0; j < 2; j++){
+            int x = (fixedX + i) >> 2;
+            int y = (fixedY + j) >> 2;
+            
+            if (x < 0 || x >= WORLD_SIZE || y < 0 || y >= WORLD_SIZE){
+                return false;
+            }
+            
+            if (world[x][y] == 1){
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 
@@ -212,6 +233,7 @@ void playerReset(){
 
 void playerUpdate(){
     bool isMoving = false;
+    bool flipMove = false;
     playerWantsToMoveX = 0;
     playerWantsToMoveY = 0;
 
@@ -229,12 +251,15 @@ void playerUpdate(){
         playerWantsToMoveY = PLAYER_WALK_SPEED;
     }
 
+    float canWalkX = playerX + playerWantsToMoveX + (flipMove * 16);
+    float canWalkY = playerY + playerWantsToMoveY + (flipMove * 16);
+
     // update pos
-    if (canWalk(playerX + playerWantsToMoveX, playerY) && playerWantsToMoveX != 0){
+    if (canWalk(canWalkX, playerY) && playerWantsToMoveX != 0){
         isMoving = true;
         playerX += playerWantsToMoveX;
     }
-    if (canWalk(playerX, playerWantsToMoveY + playerY) && playerWantsToMoveY != 0){
+    if (canWalk(playerX, canWalkY) && playerWantsToMoveY != 0){
         isMoving = true;
         playerY += playerWantsToMoveY;
     }
