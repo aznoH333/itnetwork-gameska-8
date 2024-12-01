@@ -9,8 +9,8 @@
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 const char* WINDOW_NAME = "template window";
-const int DEFAULT_SPRITE_SIZE = 32;
-const float DEFAULT_CAMERA_ZOOM = 2.0f;
+const int DEFAULT_SPRITE_SIZE = 16;
+const float DEFAULT_CAMERA_ZOOM = 6.0f;
 const int SPRITE_ORIGIN_OFFSET = DEFAULT_SPRITE_SIZE >> 1;
 
 
@@ -90,6 +90,7 @@ float scalingFactor;
 int renderTextureOffset;
 float screenShakeAmmount = 0.0f;
 int fTimer = 0;
+Vector2 cameraPos = {};
 
 //------------------------------------------------------
 // camera
@@ -100,7 +101,7 @@ void screenShake(float ammount){
 
 void updateCamera(){
 	screenShakeAmmount = fmin(screenShakeAmmount, 10);
-	Vector2 vec = {sin(fTimer) * screenShakeAmmount, cos(fTimer) * screenShakeAmmount};
+	Vector2 vec = {cameraPos.x - (SCREEN_WIDTH / DEFAULT_CAMERA_ZOOM * 0.5f) + sin(fTimer) * screenShakeAmmount, cameraPos.y - (SCREEN_HEIGHT / DEFAULT_CAMERA_ZOOM * 0.5f) + cos(fTimer) * screenShakeAmmount};
 	cam.target = vec;
 
 	if (screenShakeAmmount < 0.1f){
@@ -109,6 +110,10 @@ void updateCamera(){
 		screenShakeAmmount *= 0.2f;
 	}
 
+}
+
+void setCameraPos(Vector2 pos){
+	cameraPos = pos;
 }
 
 //------------------------------------------------------
