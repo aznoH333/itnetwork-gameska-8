@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
+#include <stdio.h>
 
 
 //====================================================================================
@@ -33,6 +33,8 @@ Tuple directionLookup[4] = {
 //====================================================================================
 // Terrain
 //====================================================================================
+void addPickup(float x, float y);
+
 unsigned char theme;
 #define WORLD_SIZE 16
 #define WORLD_TILE_SIZE 4
@@ -84,6 +86,13 @@ void resetTerrain(){
             x += directionLookup[dir].x;
             y += directionLookup[dir].y;
         }
+    }
+
+    
+    for (int i = 0; i < 5; i++){
+        Tuple chosenPoint = points[GetRandomValue(0, ((pointCounter - 1)>>1)<<1)];
+        
+        addPickup(((chosenPoint.x * 4) + GetRandomValue(0, 3)) * 16, ((chosenPoint.y * 4) + GetRandomValue(0, 3)) * 16);
     }
 }
 
@@ -224,6 +233,9 @@ float playerWantsToMoveX;
 float playerWantsToMoveY;
 float cooldown;
 float fireCooldown;
+float damage;
+bool isDead;
+unsigned int score;
 #define PLAYER_WALK_SPEED 1.7f;
 int playerSprite;
 
@@ -234,6 +246,10 @@ void playerReset(){
     playerFlip = false;
     cooldown = 0;
     fireCooldown = 30.0f;
+    damage = 50;
+    score = 0;
+    isDead = false;
+
 }
 
 
@@ -363,6 +379,27 @@ void updateGhosts(){
             continue;
         }
 
+        // arrow collisions
+        for (int i = 0; i < ARROW_COUNT; i++){
+            if (arrows[i] == 0){
+                continue;
+            }
+
+            Arrow* a = arrows[i];
+
+            if (checkBoxCollisions(a->x, a->y, 16, 16, g->x, g->y, 16, 16)){
+                arrows[i] = 0;
+                free(a);
+                g->health -= damage;
+                screenShake(1.2f);
+            }
+        }
+
+        // player collisions
+        if (checkBoxCollisions(g->x, g->y, 16, 16, playerX, playerY, 16, 16)){
+            isDead = true;
+        }
+
         // move
         float dir = dirTowards(playerX, playerY, g->x, g->y);
         g->x += sinf(dir) * (0.5 + (stageCounter * 0.1));
@@ -374,6 +411,9 @@ void updateGhosts(){
             if (distanceToPlayer > 300){
                 float a = GetRandomValue(0, PI*200)/100.0f;
                 addGhost((sinf(a) * 250) + playerX, (cosf(a) * 250) + playerY);
+            }else {
+                screenShake(5.0f);
+
             }
             free(g);
             ghosts[i] = 0;
@@ -400,11 +440,95 @@ void updateGhosts(){
 
 
 //====================================================================================
+// Pickups
+//====================================================================================
+#define PICKUP_APPLE 0
+#define PICKUP_WAND 1
+#define PICKUP_GOLD 2
+
+struct Pickup{
+    float x;
+    float y;
+    unsigned char type;
+}; typedef struct Pickup Pickup;
+#define MAX_PICKUPS 10
+Pickup* pickups[MAX_PICKUPS];
+int pickupCounter = 0;
+
+void prepPickups(){
+    for (int i = 0; i < MAX_PICKUPS; i++){
+        pickups[i] = 0;
+    }
+}
+
+
+void addPickup(float x, float y){
+    if (pickups[pickupCounter] != 0){
+        free(pickups[pickupCounter]);
+    }
+
+    Pickup* p = malloc(sizeof(Pickup));
+    p->x = x;
+    p->y = y;
+    p->type = GetRandomValue(0, 2);
+
+    pickups[pickupCounter] = p;
+    pickupCounter++;
+    pickupCounter%=MAX_PICKUPS;
+}
+
+void resetPickups(){
+    for (int i = 0; i < MAX_PICKUPS; i++){
+        if (pickups[i] != 0){
+            free(pickups[i]);
+            pickups[i] = 0;
+        }
+    }
+}
+
+void pickupUpdate(){
+    for (int i = 0; i < MAX_PICKUPS; i++){
+
+        if (pickups[i] == 0){
+            continue;
+        }
+
+        Pickup* p = pickups[i];
+
+        if (checkBoxCollisions(p->x, p->y, 16, 16, playerX, playerY, 16, 16)){
+            switch (p->type) {
+                case PICKUP_APPLE:
+                    score += 20 * (stageCounter + 1);
+                    break;
+                case PICKUP_WAND:
+                    score += 5 * (stageCounter + 1);
+                    if (fireCooldown > 20){
+                        fireCooldown -= 1;
+                    }
+                    break;
+                case PICKUP_GOLD:
+                    score += 5 * (stageCounter + 1);
+                    damage += 5;
+                    break;
+            }
+            
+            free(p);
+            pickups[i] = 0;
+        }
+        draw(p->type + 17, p->x, p->y);
+    }
+}
+
+
+//====================================================================================
 // Main
 //====================================================================================
 int main(void)
 {
     initFramework();
+
+    prepPickups();
+    resetPickups();
     prepArrows();
     playerReset();
     resetArrows();
@@ -419,7 +543,8 @@ int main(void)
         fDrawBegin();
             ClearBackground(BLACK);
             playerUpdate();
-            updateTerrain();            
+            updateTerrain();
+            pickupUpdate();            
             updateArrows();
             updateGhosts();
         fDrawEnd();
