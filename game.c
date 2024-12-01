@@ -5,6 +5,15 @@
 #include <stdlib.h>
 
 
+
+//====================================================================================
+// Utils
+//====================================================================================
+float distanceTo(float x1, float y1, float x2, float y2){
+    return sqrt(pow(x1 - x2,2) + pow(y1 - y2, 2));
+}
+
+
 //====================================================================================
 // Directions
 //====================================================================================
@@ -25,10 +34,10 @@ Tuple directionLookup[4] = {
 // Terrain
 //====================================================================================
 unsigned char theme;
-unsigned int stageCounter;
 #define WORLD_SIZE 16
 #define WORLD_TILE_SIZE 4
 unsigned char world[WORLD_SIZE][WORLD_SIZE];
+unsigned int stageCounter;
 void resetTerrain(){
     theme = 0;
     stageCounter = 0;
@@ -112,8 +121,6 @@ void updateTerrain(){
 bool canWalk(float x, float y){
     int fixedX = ((int)roundf(x)) >> 4;
     int fixedY = ((int)roundf(y)) >> 4;
-    
-
 
     for (int i = 0; i < 2; i++){
         for (int j = 0; j < 2; j++){
@@ -129,7 +136,6 @@ bool canWalk(float x, float y){
             }
         }
     }
-
     return true;
 }
 
@@ -183,7 +189,7 @@ void addArrow(float x, float y, int direction){
     arrows[lastArrowIndex]->lifeTime = 255;
 }
 
-int arrowDirrectionLookup[] = {270, 90, 0, 180};
+int arrowDirrectionLookup[] = {270, 90, 180, 0};
 void updateArrows(){
     for (int i = 0; i < ARROW_COUNT; i++){
         if (arrows[i] == 0){
@@ -295,6 +301,105 @@ void playerUpdate(){
 
 
 //====================================================================================
+// Ghosts
+//====================================================================================
+struct Ghost{
+    float x;
+    float y;
+    int health;
+}; typedef struct Ghost Ghost;
+#define MAX_GHOSTS 64
+Ghost* ghosts[MAX_GHOSTS];
+int ghostCounter;
+float ghostCooldown;
+
+
+void prepGhosts(){
+    for (int i = 0; i < MAX_GHOSTS; i++){
+        ghosts[i] = 0;
+    }
+}
+
+
+void resetGhosts(){
+    for (int i = 0; i < MAX_GHOSTS; i++){
+        if (ghosts[i] != 0){
+            free(ghosts[i]);
+        }
+        ghosts[i] = 0;
+    }
+    ghostCounter = 0;
+
+    ghostCooldown = 60.0f;
+}
+
+
+void addGhost(float x, float y){
+    for (int i = 0; i < MAX_GHOSTS; i++){
+        ghostCounter++;
+        ghostCounter%=MAX_GHOSTS;
+        if (ghosts[ghostCounter] != 0){
+            continue;
+        }
+
+        Ghost* g = malloc(sizeof(Ghost));
+        g->x = x;
+        g->y = y;
+        g->health = 170 + (stageCounter * 30);
+        ghosts[ghostCounter] = g;
+        break;
+    }
+}
+
+
+void updateGhosts(){
+    Color ghostColor = {255, 255, 255, sin(fTimer * 0.25) * 30 + 150};
+    int ghostSprite = (fTimer / 12) % 4;
+
+    for (int i = 0; i < MAX_GHOSTS; i++){
+        Ghost* g = ghosts[i];
+
+        if (g == 0){
+            continue;
+        }
+
+        // move
+        float dir = dirTowards(playerX, playerY, g->x, g->y);
+        g->x += sinf(dir) * (0.5 + (stageCounter * 0.1));
+        g->y += cosf(dir) * (0.5 + (stageCounter * 0.1));
+
+        // destroy
+        float distanceToPlayer = distanceTo(g->x, g->y, playerX, playerY);
+        if (g->health < 0 || distanceToPlayer > 300){
+            if (distanceToPlayer > 300){
+                float a = GetRandomValue(0, PI*200)/100.0f;
+                addGhost((sinf(a) * 250) + playerX, (cosf(a) * 250) + playerY);
+            }
+            free(g);
+            ghosts[i] = 0;
+            break; 
+        };
+
+        // draw
+        drawC(20 + ghostSprite, g->x, g->y, ghostColor);
+    }
+
+    
+    if (ghostCooldown == 0){
+        float a = GetRandomValue(0, PI*200)/100.0f;
+
+        addGhost((sinf(a) * 250) + playerX, (cosf(a) * 250) + playerY);
+
+        ghostCooldown = 180.0f / ((stageCounter * 0.3f) + 1.0f);
+    }else {
+        ghostCooldown--;
+    }
+
+
+}
+
+
+//====================================================================================
 // Main
 //====================================================================================
 int main(void)
@@ -305,6 +410,8 @@ int main(void)
     resetArrows();
     ToggleFullscreen();
     resetTerrain();
+    prepGhosts();
+    resetGhosts();
 
     // Main game loop
     while (!WindowShouldClose())
@@ -314,6 +421,7 @@ int main(void)
             playerUpdate();
             updateTerrain();            
             updateArrows();
+            updateGhosts();
         fDrawEnd();
     }
 
