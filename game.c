@@ -33,6 +33,8 @@ Tuple directionLookup[4] = {
 //====================================================================================
 // Terrain
 //====================================================================================
+void goToNextLevel();
+void resetGame();
 void addPickup(float x, float y);
 
 unsigned char theme;
@@ -40,9 +42,11 @@ unsigned char theme;
 #define WORLD_TILE_SIZE 4
 unsigned char world[WORLD_SIZE][WORLD_SIZE];
 unsigned int stageCounter;
+unsigned int pickupCount;
 void resetTerrain(){
     theme = 0;
     stageCounter = 0;
+    pickupCount = 0;
     
     // generation vals
     Tuple points[WORLD_SIZE * WORLD_SIZE];
@@ -89,9 +93,9 @@ void resetTerrain(){
     }
 
     
-    for (int i = 0; i < 5; i++){
+    for (int i = 0; i < GetRandomValue(5, 10); i++){
         Tuple chosenPoint = points[GetRandomValue(0, ((pointCounter - 1)>>1)<<1)];
-        
+        pickupCount++;
         addPickup(((chosenPoint.x * 4) + GetRandomValue(0, 3)) * 16, ((chosenPoint.y * 4) + GetRandomValue(0, 3)) * 16);
     }
 }
@@ -238,6 +242,12 @@ bool isDead;
 unsigned int score;
 #define PLAYER_WALK_SPEED 1.7f;
 int playerSprite;
+
+
+void playerRespawn(){
+    playerX = (WORLD_SIZE >> 1) * WORLD_TILE_SIZE * 16 + 24;
+    playerY = (WORLD_SIZE >> 1) * WORLD_TILE_SIZE * 16 + 24;
+}
 
 
 void playerReset(){
@@ -402,8 +412,8 @@ void updateGhosts(){
 
         // move
         float dir = dirTowards(playerX, playerY, g->x, g->y);
-        g->x += sinf(dir) * (0.5 + (stageCounter * 0.1));
-        g->y += cosf(dir) * (0.5 + (stageCounter * 0.1));
+        g->x += sinf(dir) * (1.5f - (1.0f / ((stageCounter>>2) + 1)));
+        g->y += cosf(dir) * (1.5f - (1.0f / ((stageCounter>>2) + 1)));
 
         // destroy
         float distanceToPlayer = distanceTo(g->x, g->y, playerX, playerY);
@@ -425,7 +435,7 @@ void updateGhosts(){
     }
 
     
-    if (ghostCooldown == 0){
+    if (ghostCooldown <= 0){
         float a = GetRandomValue(0, PI*200)/100.0f;
 
         addGhost((sinf(a) * 250) + playerX, (cosf(a) * 250) + playerY);
@@ -514,11 +524,32 @@ void pickupUpdate(){
             
             free(p);
             pickups[i] = 0;
+            pickupCount--;
+            if (pickupCount == 0){
+                goToNextLevel();
+            }
         }
         draw(p->type + 17, p->x, p->y);
     }
 }
 
+//====================================================================================
+// Controll
+//====================================================================================
+void goToNextLevel(){
+    
+    float a = stageCounter;
+    resetPickups();
+    resetArrows();
+    resetGhosts();
+    resetTerrain();
+    playerRespawn();
+
+    stageCounter = a + 1;
+    theme = stageCounter % 3;
+
+
+}
 
 //====================================================================================
 // Main
