@@ -255,7 +255,7 @@ void playerReset(){
     playerY = (WORLD_SIZE >> 1) * WORLD_TILE_SIZE * 16 + 24;
     playerFlip = false;
     cooldown = 0;
-    fireCooldown = 30.0f;
+    fireCooldown = 45.0f;
     damage = 50;
     score = 0;
     isDead = false;
@@ -264,6 +264,15 @@ void playerReset(){
 
 
 void playerUpdate(){
+    if (isDead){
+        if (IsKeyDown(KEY_R)){
+            resetGame();
+        }
+        return;
+    }
+    
+    
+    
     bool isMoving = false;
     bool flipMove = false;
     playerWantsToMoveX = 0;
@@ -371,7 +380,7 @@ void addGhost(float x, float y){
         Ghost* g = malloc(sizeof(Ghost));
         g->x = x;
         g->y = y;
-        g->health = 170 + (stageCounter * 30);
+        g->health = 100 + (stageCounter * 30.0f);
         ghosts[ghostCounter] = g;
         break;
     }
@@ -423,7 +432,6 @@ void updateGhosts(){
                 addGhost((sinf(a) * 250) + playerX, (cosf(a) * 250) + playerY);
             }else {
                 screenShake(5.0f);
-
             }
             free(g);
             ghosts[i] = 0;
@@ -547,8 +555,15 @@ void goToNextLevel(){
 
     stageCounter = a + 1;
     theme = stageCounter % 3;
+}
 
 
+void resetGame(){
+    resetPickups();
+    resetArrows();
+    resetGhosts();
+    resetTerrain();
+    playerReset();
 }
 
 //====================================================================================
@@ -563,14 +578,19 @@ int main(void)
     prepArrows();
     playerReset();
     resetArrows();
-    ToggleFullscreen();
     resetTerrain();
     prepGhosts();
     resetGhosts();
 
+
+
     // Main game loop
     while (!WindowShouldClose())
     {
+        if (IsKeyPressed(KEY_P)){
+            ToggleBorderlessWindowed();
+        }
+        
         fDrawBegin();
             ClearBackground(BLACK);
             playerUpdate();

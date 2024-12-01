@@ -10,7 +10,7 @@ const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 const char* WINDOW_NAME = "template window";
 const int DEFAULT_SPRITE_SIZE = 16;
-const float DEFAULT_CAMERA_ZOOM = 1.0f;//6.0f;
+const float DEFAULT_CAMERA_ZOOM = 5.5f;
 const int SPRITE_ORIGIN_OFFSET = DEFAULT_SPRITE_SIZE >> 1;
 
 
@@ -186,7 +186,6 @@ void initFramework(){
 	loadedSheet = initSpriteSheet();
 	scalingFactor = SCREEN_WIDTH /(float)(GetScreenWidth());
 	renderTextureOffset = ((GetScreenWidth()) / 2) - (SCREEN_WIDTH / 2);
-	ToggleFullscreen();
 	cam.zoom = DEFAULT_CAMERA_ZOOM;
 }
 
