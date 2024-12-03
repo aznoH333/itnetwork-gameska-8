@@ -5,7 +5,7 @@
 #include "gframework.c"
 #include <stdlib.h>
 #include "player.c"
-
+#include "sparkle.c"
 
 
 
@@ -15,6 +15,7 @@
 #define PICKUP_APPLE 0
 #define PICKUP_WAND 1
 #define PICKUP_GOLD 2
+#define FADE_DISTANCE 60.0f
 
 struct Pickup{
     float x;
@@ -64,7 +65,7 @@ void pickupUpdate(){
         }
 
         Pickup* p = pickups[i];
-
+        // collisions
         if (checkBoxCollisions(p->x, p->y, 16, 16, playerX, playerY, 16, 16)){
             switch (p->type) {
                 case PICKUP_APPLE:
@@ -89,7 +90,30 @@ void pickupUpdate(){
                 goToNextLevel();
             }
         }
-        draw(p->type + 17, p->x, p->y);
+        // sparkle
+        if (fTimer % 10 == 0 && GetRandomValue(0, 3) == 1){
+            addSparkle(p->x, p->y);
+        }
+
+
+        // draw
+        Color c = {255, 255, 255, 255};
+        float distanceToPlayer = distanceTo(p->x, p->y, playerX, playerY);
+
+        if (distanceToPlayer >= FADE_DISTANCE){
+            c.r = 0;
+            c.g = 0;
+            c.b = 0;
+        }else {
+            float fadeFactor = (FADE_DISTANCE - distanceToPlayer) / FADE_DISTANCE;
+            c.r *= fadeFactor;
+            c.g *= fadeFactor;
+            c.b *= fadeFactor;
+        }
+        
+
+
+        drawC(p->type + 17, p->x, p->y, c);
     }
 }
 

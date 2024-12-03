@@ -8,6 +8,7 @@
 #include "player.c"
 #include "ghosts.c"
 #include "pickups.c"
+#include "sparkle.c"
 #include "gamecontrol.c"
 
 
@@ -26,7 +27,8 @@ int main(void)
     resetTerrain();
     prepGhosts();
     resetGhosts();
-
+    prepSparkles();
+    resetSparkles();
 
 
     // Main game loop
@@ -43,6 +45,7 @@ int main(void)
             pickupUpdate();            
             updateArrows();
             updateGhosts();
+            updateSparkles();
         fDrawEnd();
     }
 

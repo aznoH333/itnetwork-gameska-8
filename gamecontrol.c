@@ -7,6 +7,7 @@
 #include "player.c"
 #include "ghosts.c"
 #include "pickups.c"
+#include "sparkle.c"
 
 //====================================================================================
 // Controll
@@ -19,6 +20,7 @@ void goToNextLevel(){
     resetGhosts();
     resetTerrain();
     playerRespawn();
+    resetSparkles();
 
     stageCounter = a + 1;
     theme = stageCounter % 3;
@@ -31,6 +33,7 @@ void resetGame(){
     resetGhosts();
     resetTerrain();
     playerReset();
+    resetSparkles();
 }
 
 
