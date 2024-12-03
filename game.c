@@ -38,8 +38,8 @@ int main(void)
         
         fDrawBegin();
             ClearBackground(BLACK);
-            playerUpdate();
             updateTerrain();
+            playerUpdate();
             pickupUpdate();            
             updateArrows();
             updateGhosts();

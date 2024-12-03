@@ -78,10 +78,11 @@ void resetTerrain(){
 }
 
 
-void drawSquare(int x, int y){
+void drawSquare(int x, int y, bool isWall){
     for (int i = 0; i < 4; i ++){
         for (int j = 0; j < 4; j++){
-            draw(theme, ((x * WORLD_TILE_SIZE) + i) * 16, ((y * WORLD_TILE_SIZE) + j) * 16);
+            int sprite = (theme * isWall) + (!isWall * 3);
+            draw(sprite, ((x * WORLD_TILE_SIZE) + i) * 16, ((y * WORLD_TILE_SIZE) + j) * 16);
         }
     }
 }
@@ -91,19 +92,16 @@ void updateTerrain(){
     // world
     for (int x = 0; x < WORLD_SIZE; x++){
         for (int y = 0; y < WORLD_SIZE; y++){
-            if (world[x][y] == 0){
-                continue;
-            }
-            drawSquare(x, y);
+            drawSquare(x, y, world[x][y] == 1);
         }
     }
 
     // world border
     for (int i = -1; i < WORLD_SIZE + 1; i++){
-        drawSquare(i, -1);
-        drawSquare(i, WORLD_SIZE);
-        drawSquare(-1, i);
-        drawSquare(WORLD_SIZE, i);
+        drawSquare(i, -1, true);
+        drawSquare(i, WORLD_SIZE, true);
+        drawSquare(-1, i, true);
+        drawSquare(WORLD_SIZE, i, true);
     }
 }
 

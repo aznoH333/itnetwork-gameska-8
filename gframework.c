@@ -107,7 +107,7 @@ void updateCamera(){
 	if (screenShakeAmmount < 0.1f){
 		screenShakeAmmount = 0;
 	}else {
-		screenShakeAmmount *= 0.2f;
+		screenShakeAmmount -= 0.2f;
 	}
 
 }

@@ -15,7 +15,7 @@ struct Ghost{
 Ghost* ghosts[MAX_GHOSTS];
 int ghostCounter;
 float ghostCooldown;
-
+#define INVIS_DISTANCE 145.0f
 
 void prepGhosts(){
     for (int i = 0; i < MAX_GHOSTS; i++){
@@ -56,7 +56,6 @@ void addGhost(float x, float y){
 
 
 void updateGhosts(){
-    Color ghostColor = {255, 255, 255, sin(fTimer * 0.25) * 30 + 150};
     int ghostSprite = (fTimer / 12) % 4;
 
     for (int i = 0; i < MAX_GHOSTS; i++){
@@ -65,6 +64,8 @@ void updateGhosts(){
         if (g == 0){
             continue;
         }
+        Color ghostColor = {255, 255, 255, sin(fTimer * 0.25) * 30 + 200};
+
 
         // arrow collisions
         for (int i = 0; i < ARROW_COUNT; i++){
@@ -78,7 +79,7 @@ void updateGhosts(){
                 arrows[i] = 0;
                 free(a);
                 g->health -= damage;
-                screenShake(1.2f);
+                screenShake(1.0f);
             }
         }
 
@@ -99,7 +100,7 @@ void updateGhosts(){
                 float a = GetRandomValue(0, PI*200)/100.0f;
                 addGhost((sinf(a) * 250) + playerX, (cosf(a) * 250) + playerY);
             }else {
-                screenShake(5.0f);
+                screenShake(2.0f);
             }
             free(g);
             ghosts[i] = 0;
@@ -107,6 +108,13 @@ void updateGhosts(){
         };
 
         // draw
+        if (distanceToPlayer >= INVIS_DISTANCE){
+            continue;
+        }
+
+        float fadeFactor = (INVIS_DISTANCE - distanceToPlayer) / INVIS_DISTANCE;
+        ghostColor.a = ghostColor.a * fadeFactor;
+
         drawC(20 + ghostSprite, g->x, g->y, ghostColor);
     }
 
