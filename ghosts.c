@@ -117,6 +117,11 @@ void updateGhosts(){
             Arrow* a = arrows[i];
 
             if (checkBoxCollisions(a->x, a->y, 16, 16, g->x, g->y, 16, 16)){
+                // spawn sparkles
+                for (int j = 0; j < 3; j++){
+                    addSparkle(GetRandomValue(a->x, a->x + 4), GetRandomValue(a->y, a->y + 4));
+                }
+                
                 arrows[i] = 0;
                 free(a);
                 g->health -= damage;

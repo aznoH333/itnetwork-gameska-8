@@ -3,6 +3,7 @@
 
 
 #include "gframework.c"
+#include <raylib.h>
 #include <stdlib.h>
 #include "player.c"
 #include "sparkle.c"
@@ -67,6 +68,13 @@ void pickupUpdate(){
         Pickup* p = pickups[i];
         // collisions
         if (checkBoxCollisions(p->x, p->y, 16, 16, playerX, playerY, 16, 16)){
+            // spawn sparkles
+            for (int j = 0; j < 5; j++){
+                addSparkle(GetRandomValue(p->x, p->x + 4), GetRandomValue(p->y, p->y + 4));
+            }
+            
+
+            // do effect
             switch (p->type) {
                 case PICKUP_APPLE:
                     score += 20 * (stageCounter + 1);

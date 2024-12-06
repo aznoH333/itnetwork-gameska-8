@@ -4,6 +4,7 @@
 #include "directions.c"
 #include <stdlib.h>
 #include "gframework.c"
+#include "sparkle.c"
 
 //====================================================================================
 // Arrows
