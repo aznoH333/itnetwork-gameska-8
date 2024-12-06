@@ -17,6 +17,9 @@ float cooldown;
 float fireCooldown;
 float damage;
 bool isDead;
+float skullY;
+float skullYM;
+unsigned char skullBounce;
 unsigned int score;
 #define PLAYER_WALK_SPEED 1.7f;
 int playerSprite;
@@ -37,20 +40,40 @@ void playerReset(){
     damage = 50;
     score = 0;
     isDead = false;
+    skullY = 8.0f;
+    skullYM = -0.5f;
+    skullBounce = 2;
 
 }
 
+
+void deadUpdate(){
+    skullY += skullYM;
+    skullYM -= 0.05f;
+
+    if (skullY < 0){
+        skullY = 0;
+        if (skullBounce > 0){
+            skullBounce--;
+            skullYM = skullBounce * 0.7f;
+        }
+    }
+
+    // draw
+    draw(35, playerX, playerY - skullY);
+}
 
 void playerUpdate(){
     if (isDead){
         if (IsKeyDown(KEY_R)){
             resetGame();
         }
+        deadUpdate();
         return;
     }
     
     
-    
+    // player update
     bool isMoving = false;
     bool flipMove = false;
     playerWantsToMoveX = 0;

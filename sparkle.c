@@ -52,6 +52,7 @@ void updateSparkles(){
         if (s->lifeTime >= MAX_LIFETIME){
             free(s);
             sparkles[i] = 0;
+            continue;
         }
 
         // draw

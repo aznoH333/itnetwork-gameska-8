@@ -4,6 +4,7 @@
 #include "player.c"
 #include "sparkle.c"
 #include <stdlib.h>
+#include <stdio.h>
 
 //====================================================================================
 // Ghosts
@@ -19,7 +20,7 @@ struct DeadGhost{
     float y;
     unsigned char lifeTime;
 }; typedef struct DeadGhost DeadGhost;
-#define DEAD_GHOST_LIFETIME 60
+#define DEAD_GHOST_LIFETIME 25
 #define MAX_DEAD_GHOSTS 12
 
 #define MAX_GHOSTS 64
@@ -81,17 +82,22 @@ void addGhost(float x, float y){
 
 void addDeadGhost(float x, float y){
     for (int i = 0; i < MAX_DEAD_GHOSTS; i++){
+        
+        
         deadGhostCounter++;
         deadGhostCounter %= MAX_DEAD_GHOSTS;
+        printf("%d %d %p \n", i, deadGhostCounter, deadGhosts[i]);
+
         if (deadGhosts[deadGhostCounter] != 0){
             continue;
         } 
+
 
         DeadGhost* g = malloc(sizeof(DeadGhost));
         g->x = x;
         g->y = y;
         g->lifeTime = 0;
-        deadGhosts[i] = g;
+        deadGhosts[deadGhostCounter] = g;
         break;
     }
 }
@@ -141,12 +147,16 @@ void updateGhosts(){
 
         // destroy
         float distanceToPlayer = distanceTo(g->x, g->y, playerX, playerY);
-        if (g->health < 0 || distanceToPlayer > 300){
+        if (g->health < 0 || distanceToPlayer > 300 || isDead){
+            
             if (distanceToPlayer > 300){
                 float a = GetRandomValue(0, PI*200)/100.0f;
                 addGhost((sinf(a) * 250) + playerX, (cosf(a) * 250) + playerY);
             }else {
-                screenShake(2.0f);
+                if (!isDead){
+                    screenShake(2.0f);
+                }
+                
                 addDeadGhost(g->x, g->y);
             }
             free(g);
@@ -207,7 +217,6 @@ void updateGhosts(){
         int spriteIndex = floorf(((float)g->lifeTime / DEAD_GHOST_LIFETIME) * 4);
         
         drawC(24 + spriteIndex, g->x, g->y, ghostColor);
-
     }
 
 }
