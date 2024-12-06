@@ -2,6 +2,8 @@
 #define GHOSTS 
 
 #include "player.c"
+#include "sparkle.c"
+#include <stdlib.h>
 
 //====================================================================================
 // Ghosts
@@ -11,15 +13,30 @@ struct Ghost{
     float y;
     int health;
 }; typedef struct Ghost Ghost;
+
+struct DeadGhost{
+    float x;
+    float y;
+    unsigned char lifeTime;
+}; typedef struct DeadGhost DeadGhost;
+#define DEAD_GHOST_LIFETIME 60
+#define MAX_DEAD_GHOSTS 12
+
 #define MAX_GHOSTS 64
 Ghost* ghosts[MAX_GHOSTS];
+DeadGhost* deadGhosts[MAX_DEAD_GHOSTS];
 int ghostCounter;
+int deadGhostCounter;
 float ghostCooldown;
 #define INVIS_DISTANCE 145.0f
 
 void prepGhosts(){
     for (int i = 0; i < MAX_GHOSTS; i++){
         ghosts[i] = 0;
+    }
+
+    for (int i = 0; i < MAX_DEAD_GHOSTS; i++){
+        deadGhosts[i] = 0;
     }
 }
 
@@ -32,6 +49,14 @@ void resetGhosts(){
         ghosts[i] = 0;
     }
     ghostCounter = 0;
+
+    for (int i = 0; i < MAX_DEAD_GHOSTS; i++){
+        if (deadGhosts[i] != 0){
+            free(deadGhosts[i]);
+        }
+        deadGhosts[i] = 0;
+    }
+    deadGhostCounter = 0;
 
     ghostCooldown = 60.0f;
 }
@@ -54,6 +79,22 @@ void addGhost(float x, float y){
     }
 }
 
+void addDeadGhost(float x, float y){
+    for (int i = 0; i < MAX_DEAD_GHOSTS; i++){
+        deadGhostCounter++;
+        deadGhostCounter %= MAX_DEAD_GHOSTS;
+        if (deadGhosts[deadGhostCounter] != 0){
+            continue;
+        } 
+
+        DeadGhost* g = malloc(sizeof(DeadGhost));
+        g->x = x;
+        g->y = y;
+        g->lifeTime = 0;
+        deadGhosts[i] = g;
+        break;
+    }
+}
 
 void updateGhosts(){
     int ghostSprite = (fTimer / 12) % 4;
@@ -101,6 +142,7 @@ void updateGhosts(){
                 addGhost((sinf(a) * 250) + playerX, (cosf(a) * 250) + playerY);
             }else {
                 screenShake(2.0f);
+                addDeadGhost(g->x, g->y);
             }
             free(g);
             ghosts[i] = 0;
@@ -129,6 +171,39 @@ void updateGhosts(){
         ghostCooldown--;
     }
 
+
+    // dead ghosts
+    for (int i = 0; i < MAX_DEAD_GHOSTS; i++){
+        if (deadGhosts[i] == 0){
+            continue;
+        }
+        DeadGhost* g = deadGhosts[i];
+
+        // update life
+        if (g->lifeTime < DEAD_GHOST_LIFETIME){
+            g->lifeTime++;
+        }else {
+            free(g);
+            deadGhosts[i] = 0;
+            continue;
+        }
+
+
+        // draw
+        float distanceToPlayer = distanceTo(g->x, g->y, playerX, playerY);
+
+        if (distanceToPlayer >= INVIS_DISTANCE){
+            continue;
+        }
+        Color ghostColor = {255, 255, 255, sin(fTimer * 0.25) * 30 + 200};
+        float fadeFactor = (INVIS_DISTANCE - distanceToPlayer) / INVIS_DISTANCE;
+        ghostColor.a = ghostColor.a * fadeFactor;
+        
+        int spriteIndex = floorf(((float)g->lifeTime / DEAD_GHOST_LIFETIME) * 4);
+        
+        drawC(24 + spriteIndex, g->x, g->y, ghostColor);
+
+    }
 
 }
 
