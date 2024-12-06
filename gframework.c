@@ -12,7 +12,8 @@ const char* WINDOW_NAME = "template window";
 const int DEFAULT_SPRITE_SIZE = 16;
 const float DEFAULT_CAMERA_ZOOM = 5.5f;
 const int SPRITE_ORIGIN_OFFSET = DEFAULT_SPRITE_SIZE >> 1;
-
+float currentScreenWidth;
+float currentScreenHeight;
 
 //------------------------------------------------------------------------------------
 // UTILITY
@@ -162,7 +163,8 @@ void fDrawEnd(){
     BeginDrawing();
     ClearBackground(BLACK);
     Rectangle r = { 0, 0, (float)(renderTexture.texture.width), (float)(-renderTexture.texture.height) };
-    Rectangle r2 = { renderTextureOffset, 0, (float)(GetScreenWidth()) * scalingFactor, (float)(GetScreenHeight()) };
+    Rectangle r2 = { renderTextureOffset, 0, (float)(currentScreenWidth) * scalingFactor, (float)(currentScreenHeight) };
+	//Rectangle r2 = { renderTextureOffset, 0, (float)(GetScreenWidth()) * scalingFactor, (float)(GetScreenHeight()) };
     Vector2 v = {0, 0};
     DrawTexturePro(renderTexture.texture,r,r2,v,0,WHITE);
 
@@ -173,6 +175,35 @@ void drawFancyText(const char* text, int x, int y, int scale, Color color){
 	int shadowOffset = fmax(scale / 10.0f, 1);
 	DrawText(text, x + shadowOffset, y, scale, GRAY);
 	DrawText(text, x, y, scale, color);
+
+}
+
+void gfullscreen(){
+	
+	int tWidth = currentScreenWidth;
+	int tHeight = currentScreenHeight;
+	
+	int monitor = GetCurrentMonitor();
+
+	if (IsWindowFullscreen())
+    {
+        SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+		currentScreenWidth = SCREEN_WIDTH;
+		currentScreenHeight = SCREEN_HEIGHT;
+    }
+	else
+    {
+        SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+        SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+
+		currentScreenWidth = GetMonitorWidth(monitor);
+		currentScreenHeight = GetMonitorHeight(monitor);
+    }
+
+	scalingFactor = 1.0f;// scaling factor should be 1 or the fullscreen bugs out??
+	ToggleFullscreen();
 
 }
 

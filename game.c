@@ -29,13 +29,14 @@ int main(void)
     resetGhosts();
     prepSparkles();
     resetSparkles();
+    gfullscreen();
 
 
     // Main game loop
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_P)){
-            ToggleBorderlessWindowed();
+            gfullscreen();
         }
         
         fDrawBegin();
