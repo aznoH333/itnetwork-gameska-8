@@ -13,6 +13,7 @@
 void goToNextLevel();
 void resetGame();
 void addPickup(float x, float y);
+void addExit(float x, float y);
 
 unsigned char theme;
 #define WORLD_SIZE 16
@@ -75,6 +76,9 @@ void resetTerrain(){
         pickupCount++;
         addPickup(((chosenPoint.x * 4) + GetRandomValue(0, 3)) * 16, ((chosenPoint.y * 4) + GetRandomValue(0, 3)) * 16);
     }
+    // exit
+    Tuple chosenPoint = points[GetRandomValue(0, ((pointCounter - 1)>>1)<<1)];
+    addExit(((chosenPoint.x * 4) + GetRandomValue(0, 3)) * 16, ((chosenPoint.y * 4) + GetRandomValue(0, 3)) * 16);
 }
 
 

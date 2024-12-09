@@ -16,6 +16,7 @@
 #define PICKUP_APPLE 0
 #define PICKUP_WAND 1
 #define PICKUP_GOLD 2
+#define PICKUP_EXIT 3
 #define FADE_DISTANCE 60.0f
 
 struct Pickup{
@@ -26,7 +27,7 @@ struct Pickup{
 #define MAX_PICKUPS 10
 Pickup* pickups[MAX_PICKUPS];
 int pickupCounter = 0;
-
+bool isExitOpen = false;
 void prepPickups(){
     for (int i = 0; i < MAX_PICKUPS; i++){
         pickups[i] = 0;
@@ -49,6 +50,21 @@ void addPickup(float x, float y){
     pickupCounter%=MAX_PICKUPS;
 }
 
+void addExit(float x, float y){
+    if (pickups[pickupCounter] != 0){
+        free(pickups[pickupCounter]);
+    }
+
+    Pickup* p = malloc(sizeof(Pickup));
+    p->x = x;
+    p->y = y;
+    p->type = PICKUP_EXIT;
+
+    pickups[pickupCounter] = p;
+    pickupCounter++;
+    pickupCounter%=MAX_PICKUPS;
+}
+
 void resetPickups(){
     for (int i = 0; i < MAX_PICKUPS; i++){
         if (pickups[i] != 0){
@@ -56,12 +72,13 @@ void resetPickups(){
             pickups[i] = 0;
         }
     }
+    isExitOpen = false;
 }
 
 void pickupUpdate(){
     for (int i = 0; i < MAX_PICKUPS; i++){
 
-        if (pickups[i] == 0){
+        if (pickups[i] == 0 || (pickups[i]->type == PICKUP_EXIT && !isExitOpen)){
             continue;
         }
 
@@ -89,13 +106,16 @@ void pickupUpdate(){
                     score += 5 * (stageCounter + 1);
                     damage += 5;
                     break;
+                case PICKUP_EXIT:
+                    goToNextLevel();
+                    break;
             }
             
             free(p);
             pickups[i] = 0;
             pickupCount--;
             if (pickupCount == 0){
-                goToNextLevel();
+                isExitOpen = true;
             }
         }
         // sparkle
@@ -119,9 +139,12 @@ void pickupUpdate(){
             c.b *= fadeFactor;
         }
         
+        int sprite = p->type + 17;
+        if (p->type == PICKUP_EXIT){
+            sprite = 31 + ((fTimer >> 2) % 4);
+        }
 
-
-        drawC(p->type + 17, p->x, p->y, c);
+        drawC(sprite, p->x, p->y, c);
     }
 }
 

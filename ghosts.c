@@ -86,7 +86,6 @@ void addDeadGhost(float x, float y){
         
         deadGhostCounter++;
         deadGhostCounter %= MAX_DEAD_GHOSTS;
-        printf("%d %d %p \n", i, deadGhostCounter, deadGhosts[i]);
 
         if (deadGhosts[deadGhostCounter] != 0){
             continue;
