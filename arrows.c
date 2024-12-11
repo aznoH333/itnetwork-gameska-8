@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "gframework.c"
 #include "sparkle.c"
+#include "sounds.c"
 
 //====================================================================================
 // Arrows
@@ -42,6 +43,8 @@ void resetArrows(){
 
 
 void addArrow(float x, float y, int direction){
+    playSound(SOUND_SHOOT, 0.4f);
+    
     lastArrowIndex++;
     lastArrowIndex %= ARROW_COUNT;
     

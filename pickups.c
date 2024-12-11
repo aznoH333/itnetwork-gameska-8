@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "player.c"
 #include "sparkle.c"
+#include "sounds.c"
 
 
 
@@ -78,11 +79,15 @@ void resetPickups(){
 void pickupUpdate(){
     for (int i = 0; i < MAX_PICKUPS; i++){
 
-        if (pickups[i] == 0 || (pickups[i]->type == PICKUP_EXIT && !isExitOpen)){
+        if (pickups[i] == 0){
             continue;
         }
 
         Pickup* p = pickups[i];
+
+        if (p->type == PICKUP_EXIT && isExitOpen == false){
+            return;
+        }
         // collisions
         if (checkBoxCollisions(p->x, p->y, 16, 16, playerX, playerY, 16, 16)){
             // spawn sparkles
@@ -95,16 +100,21 @@ void pickupUpdate(){
             switch (p->type) {
                 case PICKUP_APPLE:
                     score += 20 * (stageCounter + 1);
+                    playSound(SOUND_APPLE_PICKUP, 1.0f);
                     break;
                 case PICKUP_WAND:
                     score += 5 * (stageCounter + 1);
                     if (fireCooldown > 20){
                         fireCooldown -= 1;
                     }
+                    playSound(SOUND_WAND_PICKUP, 1.0f);
+
                     break;
                 case PICKUP_GOLD:
                     score += 5 * (stageCounter + 1);
                     damage += 5;
+                    playSound(SOUND_GOLD_PICKUP, 1.0f);
+
                     break;
                 case PICKUP_EXIT:
                     goToNextLevel();

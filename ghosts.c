@@ -5,6 +5,7 @@
 #include "sparkle.c"
 #include <stdlib.h>
 #include <stdio.h>
+#include "sounds.c"
 
 //====================================================================================
 // Ghosts
@@ -154,6 +155,8 @@ void updateGhosts(){
             }else {
                 if (!isDead){
                     screenShake(2.0f);
+                    playSound(SOUND_GHOST_DEATH, 0.25f);
+
                 }
                 
                 addDeadGhost(g->x, g->y);
@@ -163,12 +166,17 @@ void updateGhosts(){
             break; 
         };
 
-        // draw
         if (distanceToPlayer >= INVIS_DISTANCE){
             continue;
         }
-
         float fadeFactor = (INVIS_DISTANCE - distanceToPlayer) / INVIS_DISTANCE;
+        
+        // sound
+        if (fTimer % 30 == 0 && GetRandomValue(0, 3) == 0){
+            playSound(SOUND_GHOST1 + GetRandomValue(0, 1), fadeFactor * 0.25f);
+        }
+
+        // draw
         ghostColor.a = ghostColor.a * fadeFactor;
 
         drawC(20 + ghostSprite, g->x, g->y, ghostColor);

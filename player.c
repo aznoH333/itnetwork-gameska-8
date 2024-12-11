@@ -19,6 +19,7 @@ float damage;
 bool isDead;
 float skullY;
 float skullYM;
+int deathTimer;
 unsigned char skullBounce;
 unsigned int score;
 #define PLAYER_WALK_SPEED 1.7f;
@@ -43,6 +44,7 @@ void playerReset(){
     skullY = 8.0f;
     skullYM = -0.5f;
     skullBounce = 2;
+    deathTimer = 60;
 
 }
 
@@ -57,6 +59,10 @@ void deadUpdate(){
             skullBounce--;
             skullYM = skullBounce * 0.7f;
         }
+    }
+    deathTimer -= deathTimer > 0;
+    if (deathTimer == 1){
+        playSound(SOUND_GAME_OVER, 1.0f);
     }
 
     // draw

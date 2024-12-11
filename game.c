@@ -10,6 +10,7 @@
 #include "pickups.c"
 #include "sparkle.c"
 #include "gamecontrol.c"
+#include "sounds.c"
 
 
 //====================================================================================
@@ -18,6 +19,7 @@
 int main(void)
 {
     initFramework();
+    loadSounds();
 
     prepPickups();
     resetPickups();
@@ -51,7 +53,7 @@ int main(void)
     }
 
 	disposeFramework();
-    
+    unloadSounds();
 
     return 0;
 }
