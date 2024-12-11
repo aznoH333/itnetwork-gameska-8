@@ -15,7 +15,7 @@ struct Ghost{
     float y;
     int health;
 }; typedef struct Ghost Ghost;
-
+void scoreHit(int ammount);
 struct DeadGhost{
     float x;
     float y;
@@ -156,7 +156,8 @@ void updateGhosts(){
                 if (!isDead){
                     screenShake(2.0f);
                     playSound(SOUND_GHOST_DEATH, 0.25f);
-
+                    score++;
+                    scoreHit(5);
                 }
                 
                 addDeadGhost(g->x, g->y);

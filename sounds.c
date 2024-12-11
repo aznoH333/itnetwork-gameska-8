@@ -15,7 +15,8 @@
 #define SOUND_GHOST1 6
 #define SOUND_GHOST2 7
 #define SOUND_GHOST_DEATH 8
-#define MAX_SOUNDS SOUND_GHOST_DEATH + 1
+#define SOUND_EXIT_OPEN 9
+#define MAX_SOUNDS SOUND_EXIT_OPEN + 1
 
 Sound sounds[MAX_SOUNDS];
 
@@ -31,6 +32,7 @@ void loadSounds(){
     sounds[SOUND_GHOST1] = LoadSound("./resources/ghost_ambient1.wav");
     sounds[SOUND_GHOST2] = LoadSound("./resources/ghost_ambient2.wav");
     sounds[SOUND_GHOST_DEATH] = LoadSound("./resources/ghost_death.wav");
+    sounds[SOUND_EXIT_OPEN] = LoadSound("./resources/the_exit_is_open.wav");
 }
 
 void unloadSounds(){

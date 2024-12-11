@@ -21,10 +21,12 @@ unsigned char theme;
 unsigned char world[WORLD_SIZE][WORLD_SIZE];
 unsigned int stageCounter;
 unsigned int pickupCount;
+unsigned int totalPickups;
 void resetTerrain(){
     theme = 0;
     stageCounter = 0;
     pickupCount = 0;
+    totalPickups = 0;
     
     // generation vals
     Tuple points[WORLD_SIZE * WORLD_SIZE];
@@ -74,6 +76,7 @@ void resetTerrain(){
     for (int i = 0; i < GetRandomValue(5, 10); i++){
         Tuple chosenPoint = points[GetRandomValue(0, ((pointCounter - 1)>>1)<<1)];
         pickupCount++;
+        totalPickups++;
         addPickup(((chosenPoint.x * 4) + GetRandomValue(0, 3)) * 16, ((chosenPoint.y * 4) + GetRandomValue(0, 3)) * 16);
     }
     // exit

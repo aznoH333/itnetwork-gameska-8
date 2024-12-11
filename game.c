@@ -11,6 +11,7 @@
 #include "sparkle.c"
 #include "gamecontrol.c"
 #include "sounds.c"
+#include "hud.c"
 
 
 //====================================================================================
@@ -20,6 +21,7 @@ int main(void)
 {
     initFramework();
     loadSounds();
+    loadFont();
 
     prepPickups();
     resetPickups();
@@ -44,6 +46,8 @@ int main(void)
         fDrawBegin();
             ClearBackground(BLACK);
             updateTerrain();
+            updateHud();
+            
             playerUpdate();
             pickupUpdate();            
             updateArrows();
@@ -54,6 +58,7 @@ int main(void)
 
 	disposeFramework();
     unloadSounds();
+    unloadFont();
 
     return 0;
 }

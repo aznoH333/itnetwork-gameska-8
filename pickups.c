@@ -20,12 +20,13 @@
 #define PICKUP_EXIT 3
 #define FADE_DISTANCE 60.0f
 
+void scoreHit(int ammount);
 struct Pickup{
     float x;
     float y;
     unsigned char type;
 }; typedef struct Pickup Pickup;
-#define MAX_PICKUPS 10
+#define MAX_PICKUPS 20
 Pickup* pickups[MAX_PICKUPS];
 int pickupCounter = 0;
 bool isExitOpen = false;
@@ -100,33 +101,51 @@ void pickupUpdate(){
             switch (p->type) {
                 case PICKUP_APPLE:
                     score += 20 * (stageCounter + 1);
-                    playSound(SOUND_APPLE_PICKUP, 1.0f);
+                    scoreHit(10);
+                    
                     break;
                 case PICKUP_WAND:
                     score += 5 * (stageCounter + 1);
                     if (fireCooldown > 20){
                         fireCooldown -= 1;
                     }
-                    playSound(SOUND_WAND_PICKUP, 1.0f);
+                    
+                    scoreHit(10);
 
                     break;
                 case PICKUP_GOLD:
                     score += 5 * (stageCounter + 1);
                     damage += 5;
-                    playSound(SOUND_GOLD_PICKUP, 1.0f);
+                    
+                    scoreHit(10);
 
                     break;
                 case PICKUP_EXIT:
                     goToNextLevel();
                     break;
             }
-            
-            free(p);
-            pickups[i] = 0;
+
             pickupCount--;
             if (pickupCount == 0){
                 isExitOpen = true;
+                playSound(SOUND_EXIT_OPEN, 1.0f);
+            }else {
+                switch (p->type) {
+                    case PICKUP_APPLE:
+                        playSound(SOUND_APPLE_PICKUP, 1.0f);
+                        break;
+                    case PICKUP_GOLD:
+                        playSound(SOUND_GOLD_PICKUP, 1.0f);
+                        break;
+                    case PICKUP_WAND:
+                        playSound(SOUND_WAND_PICKUP, 1.0f);
+                        break;
+                }
             }
+            
+            free(p);
+            pickups[i] = 0;
+            
         }
         // sparkle
         if (fTimer % 10 == 0 && GetRandomValue(0, 3) == 1){
